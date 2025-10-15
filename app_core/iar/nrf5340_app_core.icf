@@ -1,0 +1,210 @@
+/*###ICF### Section handled by ICF editor, don't touch! ****/
+/*-Editor annotation file-*/
+/* IcfEditorFile="$TOOLKIT_DIR$\config\linker\NordicSemi\IcfEditor\nrf53_app_v1.xml" */
+/*-Specials-*/
+define symbol __ICFEDIT_intvec_start__ = 0x00000000;
+/*-Memory Regions-*/
+define symbol __ICFEDIT_region_ROM_start__        = 0x00000000;
+define symbol __ICFEDIT_region_ROM_end__          = 0x000FFFFF;
+define symbol __ICFEDIT_region_RAM0_start__       = 0x20000000;
+define symbol __ICFEDIT_region_RAM0_end__         = 0x2000FFFF;
+define symbol __ICFEDIT_region_RAM1_start__       = 0x20010000;
+define symbol __ICFEDIT_region_RAM1_end__         = 0x2001FFFF;
+define symbol __ICFEDIT_region_RAM2_start__       = 0x20020000;
+define symbol __ICFEDIT_region_RAM2_end__         = 0x2002FFFF;
+define symbol __ICFEDIT_region_RAM3_start__       = 0x20030000;
+define symbol __ICFEDIT_region_RAM3_end__         = 0x2003FFFF;
+define symbol __ICFEDIT_region_RAM4_start__       = 0x20040000;
+define symbol __ICFEDIT_region_RAM4_end__         = 0x2004FFFF;
+define symbol __ICFEDIT_region_RAM5_start__       = 0x20050000;
+define symbol __ICFEDIT_region_RAM5_end__         = 0x2005FFFF;
+define symbol __ICFEDIT_region_RAM6_start__       = 0x20060000;
+define symbol __ICFEDIT_region_RAM6_end__         = 0x2006FFFF;
+define symbol __ICFEDIT_region_RAM7_start__       = 0x0;
+define symbol __ICFEDIT_region_RAM7_end__         = 0x0;
+define symbol __ICFEDIT_region_SHARED_RAM_start__ = 0x20070000;
+define symbol __ICFEDIT_region_SHARED_RAM_end__   = 0x2007FFFF;
+define symbol __ICFEDIT_region_QSPI_start__       = 0x0;
+define symbol __ICFEDIT_region_QSPI_end__         = 0x0;
+/*-Sizes-*/
+define symbol __ICFEDIT_size_cstack__     = 0x4000;
+define symbol __ICFEDIT_size_proc_stack__ = 0x0;
+define symbol __ICFEDIT_size_heap__       = 0x4000;
+/**** End of ICF editor section. ###ICF###*/
+
+define memory mem with size = 4G;
+define symbol use_ROM  = (__ICFEDIT_region_ROM_start__  != 0x0 || __ICFEDIT_region_ROM_end__  != 0x0);
+define symbol use_RAM0 = (__ICFEDIT_region_RAM0_start__ != 0x0 || __ICFEDIT_region_RAM0_end__ != 0x0);
+define symbol use_RAM1 = (__ICFEDIT_region_RAM1_start__ != 0x0 || __ICFEDIT_region_RAM1_end__ != 0x0);
+define symbol use_RAM2 = (__ICFEDIT_region_RAM2_start__ != 0x0 || __ICFEDIT_region_RAM2_end__ != 0x0);
+define symbol use_RAM3 = (__ICFEDIT_region_RAM3_start__ != 0x0 || __ICFEDIT_region_RAM3_end__ != 0x0);
+define symbol use_RAM4 = (__ICFEDIT_region_RAM4_start__ != 0x0 || __ICFEDIT_region_RAM4_end__ != 0x0);
+define symbol use_RAM5 = (__ICFEDIT_region_RAM5_start__ != 0x0 || __ICFEDIT_region_RAM5_end__ != 0x0);
+define symbol use_RAM6 = (__ICFEDIT_region_RAM6_start__ != 0x0 || __ICFEDIT_region_RAM6_end__ != 0x0);
+define symbol use_RAM7 = (__ICFEDIT_region_RAM7_start__ != 0x0 || __ICFEDIT_region_RAM7_end__ != 0x0);
+define symbol use_SHARED_RAM = (__ICFEDIT_region_SHARED_RAM_start__ != 0x0 || __ICFEDIT_region_SHARED_RAM_end__ != 0x0);
+define symbol use_QSPI = (__ICFEDIT_region_QSPI_start__ != 0x0 || __ICFEDIT_region_QSPI_end__ != 0x0);
+
+if (use_ROM)
+{
+  define region ROM_region = mem:[from __ICFEDIT_region_ROM_start__ to __ICFEDIT_region_ROM_end__];
+}
+else
+{
+  define region ROM_region = [];
+}
+
+if (use_RAM0)
+{
+  define region RAM0_region = mem:[from __ICFEDIT_region_RAM0_start__ to __ICFEDIT_region_RAM0_end__];
+}
+else
+{
+  define region RAM0_region = [];
+}
+
+if (use_RAM1)
+{
+  define region RAM1_region = mem:[from __ICFEDIT_region_RAM1_start__ to __ICFEDIT_region_RAM1_end__];
+}
+else
+{
+  define region RAM1_region = [];
+}
+
+if (use_RAM2)
+{
+  define region RAM2_region = mem:[from __ICFEDIT_region_RAM2_start__ to __ICFEDIT_region_RAM2_end__];
+}
+else
+{
+  define region RAM2_region = [];
+}
+
+if (use_RAM3)
+{
+  define region RAM3_region = mem:[from __ICFEDIT_region_RAM3_start__ to __ICFEDIT_region_RAM3_end__];
+}
+else
+{
+  define region RAM3_region = [];
+}
+
+if (use_RAM4)
+{
+  define region RAM4_region = mem:[from __ICFEDIT_region_RAM4_start__ to __ICFEDIT_region_RAM4_end__];
+}
+else
+{
+  define region RAM4_region = [];
+}
+
+if (use_RAM5)
+{
+  define region RAM5_region = mem:[from __ICFEDIT_region_RAM5_start__ to __ICFEDIT_region_RAM5_end__];
+}
+else
+{
+  define region RAM5_region = [];
+}
+
+if (use_RAM6)
+{
+  define region RAM6_region = mem:[from __ICFEDIT_region_RAM6_start__ to __ICFEDIT_region_RAM6_end__];
+}
+else
+{
+  define region RAM6_region = [];
+}
+
+if (use_RAM7)
+{
+  define region RAM7_region = mem:[from __ICFEDIT_region_RAM7_start__ to __ICFEDIT_region_RAM7_end__];
+}
+else
+{
+  define region RAM7_region = [];
+}
+
+define region RAM_region = RAM0_region | RAM1_region | RAM2_region | RAM3_region
+                         | RAM4_region | RAM5_region | RAM6_region | RAM7_region;
+
+if (use_SHARED_RAM)
+{
+  define region SHARED_RAM_region = mem:[from __ICFEDIT_region_SHARED_RAM_start__ to __ICFEDIT_region_SHARED_RAM_end__];
+}
+else
+{
+  define region SHARED_RAM_region = [];
+}
+
+if (use_QSPI)
+{
+  define region QSPI_region = mem:[from __ICFEDIT_region_QSPI_start__ to __ICFEDIT_region_QSPI_end__];
+}
+else
+{
+  define region QSPI_region = [];
+}
+
+initialize by copy { readwrite };
+
+if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
+{
+  // Required in a multi-threaded application
+  initialize by copy with packing = none { section __DLIB_PERTHREAD };
+}
+
+place at address mem:__ICFEDIT_intvec_start__ { readonly section .intvec };
+
+if (!isempty(ROM_region))
+{
+  place in ROM_region  { readonly };
+}
+else if (!isempty(QSPI_region))
+{
+  place in QSPI_region  { readonly };
+}
+else if (!isempty(RAM_region))
+{
+  place in RAM_region  { readonly };
+}
+
+if (!isempty(SHARED_RAM_region))
+{
+  place in SHARED_RAM_region  { section .shared };
+}
+
+if (!isempty(QSPI_region))
+{
+  place in QSPI_region  { ro section .qspi };
+}
+
+if (isdefinedsymbol(__STARTUP_CONFIG)) {
+
+  /* CSTACK and HEAP sections defined in startup file. */
+  keep { section CSTACK };
+  keep { section PROC_STACK };
+  keep { section HEAP };
+
+  do not initialize  { section CSTACK };
+  do not initialize  { section PROC_STACK };
+  do not initialize  { section HEAP };
+
+  if (!isempty(RAM_region))
+  {
+    place in RAM_region   { readwrite, readwrite section CSTACK, readwrite section PROC_STACK, readwrite section HEAP };
+  }
+
+} else {
+
+  define block CSTACK     with alignment = 8, size = __ICFEDIT_size_cstack__   { };
+  define block PROC_STACK with alignment = 8, size = __ICFEDIT_size_proc_stack__ { };
+  define block HEAP       with alignment = 8, size = __ICFEDIT_size_heap__     { };
+
+  if (!isempty(RAM_region))
+  {
+    place in RAM_region   { readwrite, block CSTACK, block PROC_STACK, block HEAP };
+  }
+
+}

@@ -1,0 +1,157 @@
+/*
+* Copyright (c) 2025 Vladimir Alemasov
+* All rights reserved
+*
+* This program and the accompanying materials are distributed under
+* the terms of GNU General Public License version 2
+* as published by the Free Software Foundation.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*/
+
+#ifndef BLE_H
+#define BLE_H
+
+//--------------------------------------------
+#define ACCESS_ADDRESS_LENGTH                      4U
+#define MINIMUM_HEADER_LENGTH                      2U
+#define MAXIMUM_HEADER_LENGTH                      3U
+#define CRC_LENGTH                                 3U
+#define MIC_LENGTH                                 4U
+#define MINIMUM_PACKET_LENGTH                      (ACCESS_ADDRESS_LENGTH + MINIMUM_HEADER_LENGTH + CRC_LENGTH)
+#define HDR_LENGTH                                 (ACCESS_ADDRESS_LENGTH + MINIMUM_HEADER_LENGTH)
+#define L2CAP_LENGTH                               2U
+#define CCID_LENGTH                                2U
+#define SMP_HDR_LENGTH                             (HDR_LENGTH + L2CAP_LENGTH + CCID_LENGTH)
+#define MAXIMUM_PACKET_LENGTH                      (ACCESS_ADDRESS_LENGTH + MAXIMUM_HEADER_LENGTH + CRC_LENGTH + MAXIMUM_PDU_LENGTH)
+#define PDU_TYPE_MASK                              0x0F
+#define CSA_MASK                                   0x20
+#define TXADD_MASK                                 0x40
+#define RXADD_MASK                                 0x80
+#define ADV_IND                                    0x00
+#define ADV_DIRECT_IND                             0x01
+#define ADV_NONCONN_IND                            0x02
+#define SCAN_REQ                                   0x03
+#define AUX_SCAN_REQ                               0x03
+#define SCAN_RSP                                   0x04
+#define CONNECT_IND                                0x05
+#define AUX_CONNECT_REQ                            0x05
+#define ADV_SCAN_IND                               0x06
+#define ADV_EXT_IND                                0x07
+#define AUX_ADV_IND                                0x07
+#define AUX_SCAN_RSP                               0x07
+#define AUX_SYNC_IND                               0x07
+#define AUX_CHAIN_IND                              0x07
+#define AUX_CONNECT_RSP                            0x08
+#define CONNECT_REQ_PDU_LENGTH                     34
+#define CONNECT_REQ_TIME_UNIT                      1250
+#define CONNECT_REQ_TIMOUT_UNIT                    10000
+#define DEVICE_ADDRESS_LENGTH                      6
+#define CONNECT_REQ_LL_DATA                        (MINIMUM_HEADER_LENGTH + DEVICE_ADDRESS_LENGTH + DEVICE_ADDRESS_LENGTH)
+#define LLID_MASK                                  0x03
+#define NESN_MASK                                  0x04
+#define SN_MASK                                    0x08
+#define MORE_DATA_MASK                             0x10
+#define CP_MASK                                    0x20
+#define LL_CONTROL_PDU                             0x03
+#define LL_DATA_START_PDU                          0x02
+#define LL_DATA_FRAG_PDU                           0x01
+#define CID_SMP                                    0x06
+#define SMP_PAIRING_REQUEST                        0x01
+#define SMP_PAIRING_REQUEST_PDU_LENGTH             11
+#define SMP_PAIRING_REQUEST_LENGTH                 7
+#define SMP_PAIRING_RESPONSE                       0x02
+#define SMP_PAIRING_RESPONSE_PDU_LENGTH            11
+#define SMP_PAIRING_RESPONSE_LENGTH                7
+#define SMP_PAIRING_CONFIRM                        0x03
+#define SMP_PAIRING_CONFIRM_PDU_LENGTH             21
+#define SMP_PAIRING_RANDOM                         0x04
+#define SMP_PAIRING_RANDOM_PDU_LENGTH              21
+#define SMP_ENCRYPTION_INFORMATION                 0x06
+#define SMP_ENCRYPTION_INFORMATION_PDU_LENGTH      21
+#define SMP_PAIRING_PUBLIC_KEY                     0x0C
+#define SMP_PAIRING_PUBLIC_KEY_PDU_LENGTH          69
+#define SMP_PAIRING_DHKEY_CHECK                    0x0D
+#define SMP_PAIRING_DHKEY_CHECK_PDU_LENGTH         21
+#define MAXIMUM_SMP_PACKET_LENGTH                  (MINIMUM_PACKET_LENGTH + SMP_PAIRING_PUBLIC_KEY_PDU_LENGTH + 1)
+#define SC_MASK                                    0x08
+#define MITM_MASK                                  0x04
+#define AES128_BLOCK_LENGTH                        16
+#define NONCE_LENGTH                               13
+#define LL_CONNECTION_UPDATE_IND                   0x00
+#define LL_CONNECTION_UPDATE_IND_PDU_LENGTH        12
+#define LL_CHANNEL_MAP_IND                         0x01
+#define LL_CHANNEL_MAP_IND_PDU_LENGTH              8
+#define LL_TERMINATE_IND                           0x02
+#define LL_ENC_REQ                                 0x03
+#define LL_ENC_REQ_PDU_LENGTH                      23
+#define LL_ENC_RSP                                 0x04
+#define LL_ENC_RSP_PDU_LENGTH                      13
+#define LL_START_ENC_REQ                           0x05
+#define LL_PAUSE_ENC_RSP                           0x0B
+#define LL_PHY_UPDATE_IND                          0x18
+#define LL_PERIODIC_SYNC_IND                       0x1C
+#define LL_CLOCK_ACCURACY_REQ                      0x1D
+#define LL_CLOCK_ACCURACY_RSP                      0x1E
+#define LL_CIS_REQ                                 0x1F
+#define LL_CIS_IND                                 0x21
+#define LL_SUBRATE_IND                             0x27
+#define LL_PERIODIC_SYNC_WR_IND                    0x2A
+#define MAXIMUM_PDU_AES_BUFFER_LENGTH              (MAXIMUM_PDU_LENGTH / AES128_BLOCK_LENGTH + 1) * AES128_BLOCK_LENGTH
+#define ADV_CHANNEL_CRC_INIT                       0x555555
+#define ADV_CHANNEL_ACCESS_ADDRESS                 0x8E89BED6
+#define T_IFS                                      150
+#define DATA_CHANNELS_NUMBER                       37
+#define DATA_CHANNELS_BYTES_NUMBER                 (((DATA_CHANNELS_NUMBER - 1) / 8) + 1)
+#define HOP_MASK                                   0x1F
+#define DECRYPTION_ATTEMPTS_NUMBER                 10
+#define CODED_PHY_CODING_SCHEME_S2                 2
+#define CODED_PHY_CODING_SCHEME_S8                 8
+
+#define RT_PER_US                                  1
+#define T_IFS_RT                                   (T_IFS * RT_PER_US)
+
+#define BIG_CHANNEL_MAP_IND                        0
+#define BIG_TERMINATE_IND                          1
+
+#define EXTENDED_HEADER_ADVERTISING_ADDRESS_Pos    0
+#define EXTENDED_HEADER_TARGET_ADDRESS_Pos         1
+#define EXTENDED_HEADER_CTE_INFO_Pos               2
+#define EXTENDED_HEADER_ADVERTISING_DATA_INFO_Pos  3
+#define EXTENDED_HEADER_AUX_POINTER_Pos            4
+#define EXTENDED_HEADER_SYNC_INFO_Pos              5
+#define EXTENDED_HEADER_TX_POWER_Pos               6
+
+#define EXTENDED_HEADER_ADVERTISING_ADDRESS_Msk    (0x01 << EXTENDED_HEADER_ADVERTISING_ADDRESS_Pos)
+#define EXTENDED_HEADER_TARGET_ADDRESS_Msk         (0x01 << EXTENDED_HEADER_TARGET_ADDRESS_Pos)
+#define EXTENDED_HEADER_CTE_INFO_Msk               (0x01 << EXTENDED_HEADER_CTE_INFO_Pos)
+#define EXTENDED_HEADER_ADVERTISING_DATA_INFO_Msk  (0x01 << EXTENDED_HEADER_ADVERTISING_DATA_INFO_Pos)
+#define EXTENDED_HEADER_AUX_POINTER_Msk            (0x01 << EXTENDED_HEADER_AUX_POINTER_Pos)
+#define EXTENDED_HEADER_SYNC_INFO_Msk              (0x01 << EXTENDED_HEADER_SYNC_INFO_Pos)
+#define EXTENDED_HEADER_TX_POWER_Msk               (0x01 << EXTENDED_HEADER_TX_POWER_Pos)
+
+#define EXTENDED_HEADER_ADVERTISING_ADDRESS_Len    DEVICE_ADDRESS_LENGTH
+#define EXTENDED_HEADER_TARGET_ADDRESS_Len         DEVICE_ADDRESS_LENGTH
+#define EXTENDED_HEADER_CTE_INFO_Len               1
+#define EXTENDED_HEADER_ADVERTISING_DATA_INFO_Len  2
+#define EXTENDED_HEADER_AUX_POINTER_Len            3
+#define EXTENDED_HEADER_SYNC_INFO_Len              18
+#define EXTENDED_HEADER_TX_POWER_Len               1
+
+//--------------------------------------------
+uint32_t ble_get_access_address_transmission_time_us(ble_phy_t phy);
+uint32_t ble_get_access_address_transmission_time_rt(ble_phy_t phy);
+uint32_t ble_get_packet_transmission_time_us(ble_phy_t phy, size_t size);
+uint32_t ble_get_packet_transmission_time_rt(ble_phy_t phy, size_t size);
+uint32_t ble_get_transmit_window_delay_us(ble_phy_t phy, uint8_t radio_channel);
+uint32_t ble_get_transmit_window_delay_rt(ble_phy_t phy, uint8_t radio_channel);
+bool ble_bit_number_to_phy(uint8_t bit_number, ble_phy_t *phy);
+bool ble_value_to_phy(uint8_t value, ble_phy_t *phy);
+uint8_t count_used_channels(uint8_t *channel_map);
+uint8_t ble_channel_to_radio(uint8_t ble_channel);
+uint32_t ble_bis_aa_from_seed_aa_and_bis_number(uint32_t seed_aa, uint8_t n);
+
+#endif /* BLE_H */
