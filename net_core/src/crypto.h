@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Vladimir Alemasov
+* Copyright (c) 2025, 2026 Vladimir Alemasov
 * All rights reserved
 *
 * This program and the accompanying materials are distributed under
@@ -29,11 +29,21 @@ typedef struct
 } ble_crypto_t;
 
 //--------------------------------------------
+typedef struct
+{
+	uint8_t irk[16];
+	uint8_t s0_L_s1_rpa[9];
+} ble_rpares_t;
+
+//--------------------------------------------
+void crypto_ccm_init(void);
 void crypto_set_ltk(uint8_t *buf);
 void crypto_set_skd_iv_c(uint8_t *buf);
 void crypto_set_skd_iv_p(uint8_t *buf);
 bool crypto_generate_session_key(void);
 void crypto_reset_encrypted_packet_counters(void);
 void crypto_decrypt(void);
+void crypto_set_irk(uint8_t *buf);
+bool crypto_rpa_resolve(uint8_t *s0_L_s1_rpa);
 
 #endif /* CRYPTO_H_ */

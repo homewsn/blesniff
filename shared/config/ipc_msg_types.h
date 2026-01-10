@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Vladimir Alemasov
+* Copyright (c) 2025, 2026 Vladimir Alemasov
 * All rights reserved
 *
 * This program and the accompanying materials are distributed under
@@ -32,6 +32,8 @@ typedef enum
 	IPC_APP2NET_RESET_MAC_FILTER,
 	IPC_APP2NET_SET_RSSI_FILTER,
 	IPC_APP2NET_RESET_RSSI_FILTER,
+	IPC_APP2NET_SET_IRK_FILTER,
+	IPC_APP2NET_RESET_IRK_FILTER,
 } ipc_msg_type_t;
 
 

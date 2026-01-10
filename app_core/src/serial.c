@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Vladimir Alemasov
+* Copyright (c) 2025, 2026 Vladimir Alemasov
 * All rights reserved
 *
 * This program and the accompanying materials are distributed under
@@ -41,6 +41,8 @@
 #define CMD_RESET_MAC_FILTER    0x09
 #define CMD_SET_RSSI_FILTER     0x0A
 #define CMD_RESET_RSSI_FILTER   0x0B
+#define CMD_SET_IRK_FILTER      0x0C
+#define CMD_RESET_IRK_FILTER    0x0D
 //--------------------------------------------
 #define MSG_BLE_PACKET          0x80
 #define MSG_INFO                0x81
@@ -287,6 +289,15 @@ void serial_rx(void)
 		break;
 	case CMD_RESET_RSSI_FILTER:
 		msg_app2net.type = IPC_APP2NET_RESET_RSSI_FILTER;
+		msg_app2net.size = 0;
+		break;
+	case CMD_SET_IRK_FILTER:
+		msg_app2net.type = IPC_APP2NET_SET_IRK_FILTER;
+		msg_app2net.size = 16;
+		memcpy(msg_app2net.data, &msg.data[5], 16);
+		break;
+	case CMD_RESET_IRK_FILTER:
+		msg_app2net.type = IPC_APP2NET_RESET_IRK_FILTER;
 		msg_app2net.size = 0;
 		break;
 	default:

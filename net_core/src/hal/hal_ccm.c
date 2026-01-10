@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Vladimir Alemasov
+* Copyright (c) 2025, 2026 Vladimir Alemasov
 * All rights reserved
 *
 * This program and the accompanying materials are distributed under
@@ -66,6 +66,11 @@ void hal_ccm_init(void)
 	NRF_CCM_NS->SCRATCHPTR = (uint32_t)scratch_data;
 	NRF_CCM_NS->MODE = (CCM_MODE_MODE_Decryption << CCM_MODE_MODE_Pos) | (CCM_MODE_LENGTH_Extended << CCM_MODE_LENGTH_Pos);
 	NRF_CCM_NS->CNFPTR = (uint32_t)&ccm_cnf;
+
+	// Clear events
+	NRF_CCM_NS->EVENTS_ERROR = 0;
+	NRF_CCM_NS->EVENTS_ENDKSGEN = 0;
+	NRF_CCM_NS->EVENTS_ENDCRYPT = 0;
 
 	// Enable interrupt on ENDCRYPT state
 	NRF_CCM_NS->INTENSET = CCM_INTENSET_ENDCRYPT_Msk;

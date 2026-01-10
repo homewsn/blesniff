@@ -30,12 +30,14 @@ To use the sniffer, you'll need [Bsniffhub](https://github.com/homewsn/bsniffhub
                      (def: 37,38,39)
   -R <RSSI>          Filter sniffer packets by minimum RSSI
   -m <MAC>           Filter sniffer packets by advertiser MAC
+  -i <IRK>           Filter sniffer packets by advertiser IRK
   -f <MODE>          Blesniff follow mode:
                      'conn' - connection
                      'pa' - periodic advertising
                      'cis' - connected isochronous stream ('conn' is also required)
                      'bis' - broadcast isochronous stream ('pa' is also required)
                      (def: conn,pa,cis,bis)
+  -L <LTK>           LTK key for decrypting packets
 ```
 
 #### Examples (Linux)

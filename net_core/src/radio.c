@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Vladimir Alemasov
+* Copyright (c) 2025, 2026 Vladimir Alemasov
 * All rights reserved
 *
 * This program and the accompanying materials are distributed under
@@ -21,10 +21,8 @@
 #include "hal_radio.h"
 #include "hal_rt.h"
 #include "hal_ipc.h"
-#include "crypto.h"
-#include "hal_ccm.h"
-#include "hal_ecb.h"
 #include "hal_dppi.h"
+#include "crypto.h"
 #include "ipc_msg_types.h"
 #include "msg_queue_app2net.h"
 #include "msg_queue_net2app.h"
@@ -92,6 +90,8 @@ typedef struct
 	uint8_t follow_filter;
 	bool mac_filter;
 	uint8_t mac_addr[DEVICE_ADDRESS_LENGTH];
+	bool irk_filter;
+	uint8_t irk[16];
 	uint8_t hop_map[3];
 	uint8_t hop_map_size;
 	uint8_t hop_map_count;
@@ -466,6 +466,8 @@ static void connection_packet_processing(radio_packet_t *packet)
 		+ ble_get_access_address_transmission_time_rt(conf.acl.params.phy)         // + time to receive access address
 		+ MAX_WINDOW_DRIFT_RT;                                                     // + maximum window drift
 	radio_rx_list_put(radio_rx_item, FROM_CONNECT_IND);
+
+	crypto_ccm_init();
 }
 
 //--------------------------------------------
@@ -1977,9 +1979,11 @@ static void adv_packet_not_received(void)
 		hal_radio_set_params(rx_get_params(BLE_CHAN_ADV));
 		hal_radio_start();
 
-		// hop time: 170
-		// ToDo: make it customizable
-		uint32_t end_time = hal_rt_get_counter() + 170;
+		// hop time
+		// 800 us for ADV_IND
+		// 170 us for ADV_EXT_IND, but ADV_EXT_IND is currently only received on channel 37
+		// ToDo: make it customizable?
+		uint32_t end_time = hal_rt_get_counter() + 800;
 
 		set_radio_stop_time(end_time);
 
@@ -1999,7 +2003,9 @@ static bool adv_packet_received(uint8_t *data, uint32_t timestamp)
 	case ADV_DIRECT_IND:
 	case ADV_NONCONN_IND:
 	case ADV_SCAN_IND:
-		if (!filter.mac_filter || (filter.mac_filter && !memcmp(filter.mac_addr, data + 2, DEVICE_ADDRESS_LENGTH)))
+		if ((!filter.mac_filter && !filter.irk_filter) ||
+		    (filter.mac_filter && !memcmp(filter.mac_addr, data + 2, DEVICE_ADDRESS_LENGTH)) ||
+		    (filter.irk_filter && crypto_rpa_resolve(data + 2)))
 		{
 			filter.look_for_connect = true;
 			filter.do_not_follow = false;
@@ -2022,15 +2028,21 @@ static bool adv_packet_received(uint8_t *data, uint32_t timestamp)
 	case CONNECT_IND:
 		if (filter.follow_filter & FOLLOW_CONN)
 		{
-			filter.look_for_connect = false;
-			filter.do_not_follow = false;
-			return false;
+			if ((!filter.mac_filter && !filter.irk_filter) ||
+			    (filter.mac_filter && (!memcmp(filter.mac_addr, data + 2 + DEVICE_ADDRESS_LENGTH, DEVICE_ADDRESS_LENGTH))) ||
+			    (filter.irk_filter && (crypto_rpa_resolve(data + 2 + DEVICE_ADDRESS_LENGTH))))
+			{
+				filter.look_for_connect = false;
+				filter.do_not_follow = false;
+				return false;
+			}
 		}
 		filter.do_not_follow = true;
 		break;
 	case SCAN_REQ:
-		if (!filter.mac_filter || (filter.mac_filter && (!memcmp(filter.mac_addr, data + 2, DEVICE_ADDRESS_LENGTH) ||
-			!memcmp(filter.mac_addr, data + 2 + DEVICE_ADDRESS_LENGTH, DEVICE_ADDRESS_LENGTH))))
+		if ((!filter.mac_filter && !filter.irk_filter) ||
+		    (filter.mac_filter && (!memcmp(filter.mac_addr, data + 2, DEVICE_ADDRESS_LENGTH) || !memcmp(filter.mac_addr, data + 2 + DEVICE_ADDRESS_LENGTH, DEVICE_ADDRESS_LENGTH))) ||
+		    (filter.irk_filter && (crypto_rpa_resolve(data + 2) || crypto_rpa_resolve(data + 2 + DEVICE_ADDRESS_LENGTH))))
 		{
 			filter.do_not_follow = false;
 		}
@@ -2040,7 +2052,9 @@ static bool adv_packet_received(uint8_t *data, uint32_t timestamp)
 		}
 		break;
 	case SCAN_RSP:
-		if (!filter.mac_filter || (filter.mac_filter && !memcmp(filter.mac_addr, data + 2, DEVICE_ADDRESS_LENGTH)))
+		if ((!filter.mac_filter && !filter.irk_filter) ||
+		    (filter.mac_filter && !memcmp(filter.mac_addr, data + 2, DEVICE_ADDRESS_LENGTH)) ||
+		    (filter.irk_filter && crypto_rpa_resolve(data + 2)))
 		{
 			filter.do_not_follow = false;
 		}
@@ -2050,8 +2064,9 @@ static bool adv_packet_received(uint8_t *data, uint32_t timestamp)
 		}
 		break;
 	case ADV_EXT_IND:
-		if ((!filter.mac_filter || (filter.mac_filter && (data[3] & EXTENDED_HEADER_ADVERTISING_DATA_INFO_Msk) &&
-			!memcmp(filter.mac_addr, data + 4, DEVICE_ADDRESS_LENGTH))))
+		if ((!filter.mac_filter && !filter.irk_filter) ||
+		    (filter.mac_filter && (data[3] & EXTENDED_HEADER_ADVERTISING_DATA_INFO_Msk) && !memcmp(filter.mac_addr, data + 4, DEVICE_ADDRESS_LENGTH)) ||
+		    (filter.irk_filter && (data[3] & EXTENDED_HEADER_ADVERTISING_DATA_INFO_Msk) && crypto_rpa_resolve(data + 4)))
 		{
 			filter.look_for_connect = false;
 			filter.do_not_follow = false;
@@ -2313,7 +2328,7 @@ static void radio_irq_callback(uint8_t *data, bool rx_done)
 	{
 		return;
 	}
-	if (filter.mac_filter && filter.do_not_follow)
+	if ((filter.mac_filter || filter.irk_filter) && filter.do_not_follow)
 	{
 		return;
 	}
@@ -2344,6 +2359,7 @@ static void radio_reset(void)
 
 	filter.follow_filter = FOLLOW_CONN | FOLLOW_PA | FOLLOW_CIS | FOLLOW_BIS;
 	filter.mac_filter = false;
+	filter.irk_filter = false;
 	filter.hop_map[0] = 37;
 	filter.hop_map[1] = 38;
 	filter.hop_map[2] = 39;
@@ -2435,6 +2451,19 @@ static void radio_reset_mac_filter(void)
 }
 
 //--------------------------------------------
+static void radio_set_irk_filter(uint8_t *irk)
+{
+	crypto_set_irk(irk);
+	filter.irk_filter = true;
+}
+
+//--------------------------------------------
+static void radio_reset_irk_filter(void)
+{
+	filter.irk_filter = false;
+}
+
+//--------------------------------------------
 static void radio_set_rssi_filter(int8_t rssi)
 {
 	filter.rssi = rssi;
@@ -2486,6 +2515,12 @@ static void mem_callback(void)
 			break;
 		case IPC_APP2NET_RESET_RSSI_FILTER:
 			radio_reset_rssi_filter();
+			break;
+		case IPC_APP2NET_SET_IRK_FILTER:
+			radio_set_irk_filter(msg_app2net.data);
+			break;
+		case IPC_APP2NET_RESET_IRK_FILTER:
+			radio_reset_irk_filter();
 			break;
 		default:
 			break;

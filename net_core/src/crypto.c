@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Vladimir Alemasov
+* Copyright (c) 2025, 2026 Vladimir Alemasov
 * All rights reserved
 *
 * This program and the accompanying materials are distributed under
@@ -19,16 +19,31 @@
 #include <assert.h>    /* assert */
 #include "hal_ecb.h"
 #include "hal_ccm.h"
+#include "hal_aar.h"
 #include "crypto.h"
 #include "radio_packet.h"
 #include "ble.h"
 #include "msg_queue_rx2decrypt.h"
+
+//--------------- Debugging ------------------
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#ifndef DEBUG_BREAK
+#define DEBUG_BREAK                0
+#endif
+//--------------------------------------------
+#if DEBUG_BREAK
+#define __debugbreak() __asm("bkpt 0")
+#else
+#define __debugbreak()
+#endif
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 //--------------------------------------------
 static ble_crypto_t ble_crypto;
 static uint8_t enc_buf[MAX_PACKET_SIZE];
 static uint8_t dec_buf[MAX_PACKET_SIZE];
 static bool decryption_in_progress;
+static ble_rpares_t ble_rpares;
 
 void acl_packet_processing_from_queue(void);
 //--------------------------------------------
@@ -37,7 +52,14 @@ static void crypto_irq_callback(bool mic_status)
 	rx2decrypt_item_t *item;
 	decryption_in_progress = false;
 
-	assert(msg_queue_rx2decrypt_get_first_encrypted_item_ptr(&item));
+	if (!msg_queue_rx2decrypt_get_first_encrypted_item_ptr(&item))
+	{
+#if 1
+		__debugbreak();
+#endif
+		return;
+	}
+	
 	item->need_to_decrypt = false;
 	item->mic_status = mic_status;
 
@@ -50,10 +72,15 @@ static void crypto_irq_callback(bool mic_status)
 }
 
 //--------------------------------------------
+void crypto_ccm_init(void)
+{
+	hal_ccm_init();
+}
+
+//--------------------------------------------
 void crypto_set_ltk(uint8_t *buf)
 {
 	memcpy(ble_crypto.ltk, buf, 16);
-	hal_ccm_init();
 	hal_ccm_set_irq_callback(crypto_irq_callback);
 }
 
@@ -144,4 +171,17 @@ void crypto_decrypt(void)
 	item->mic_status = 0;
 	decryption_in_progress = true;
 	hal_ccm_decrypt(enc_buf, dec_buf);
+}
+
+//--------------------------------------------
+void crypto_set_irk(uint8_t *buf)
+{
+	memcpy(ble_rpares.irk, buf, 16);
+}
+
+//--------------------------------------------
+bool crypto_rpa_resolve(uint8_t *rpa)
+{
+	memcpy(ble_rpares.s0_L_s1_rpa + 3, rpa, 6);
+	return hal_aar_resolve(ble_rpares.irk, ble_rpares.s0_L_s1_rpa);
 }
