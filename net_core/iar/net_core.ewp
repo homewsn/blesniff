@@ -1127,6 +1127,9 @@
         <group>
             <name>hal</name>
             <file>
+                <name>$PROJ_DIR$\..\src\hal\hal_aar.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\src\hal\hal_ccm.c</name>
             </file>
             <file>

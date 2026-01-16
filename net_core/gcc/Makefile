@@ -62,6 +62,7 @@ SOURCEFILES1 += $(MAINDIR)/crypto.c
 SOURCEFILES1 += $(MAINDIR)/radio.c
 SOURCEFILES1 += $(MAINDIR)/radio_conf_list.c
 SOURCEFILES1 += $(MAINDIR)/radio_rx_list.c
+SOURCEFILES1 += $(HALDIR)/hal_aar.c
 SOURCEFILES1 += $(HALDIR)/hal_ccm.c
 SOURCEFILES1 += $(HALDIR)/hal_dppi.c
 SOURCEFILES1 += $(HALDIR)/hal_ecb.c
